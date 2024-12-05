@@ -7,7 +7,7 @@
         "vitest": "^2.1.8"
     },
     "name": "unitspan",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Create differential spans for units of measurement, including time measurements, digital (binary) measurements, and more.",
     "main": "src/index.js",
     "directories": {
@@ -64,6 +64,9 @@
         "digital"
     ],
     "author": "Travis R. Zuleger",
+    "repository": {
+        "url": "https://github.com/tzuleger/unitspan"
+    },
     "license": "MIT",
     "module": "./dist/index.js",
     "types": "./dist/types/index.d.ts",
