@@ -21,7 +21,6 @@ export class DigiSpan extends UnitSpan {
     }
 
     /**
-     * 
      * @param {number} numKibiBytes 
      */
     static fromKibiBytes(numKibiBytes) {
@@ -29,11 +28,60 @@ export class DigiSpan extends UnitSpan {
     }
 
     /**
-     * 
      * @param {number} numMebiBytes 
      */
     static fromMebiBytes(numMebiBytes) {
         return new DigiSpan(numMebiBytes / DigitalSpanUnitsConverter.Mebibytes);
+    }
+
+    /**
+     * @param {number} numGibiBytes 
+     */
+    static fromGibiBytes(numGibiBytes) {
+        return new DigiSpan(numGibiBytes / DigitalSpanUnitsConverter.Gibibytes);
+    }
+
+    /**
+     * @param {number} numTebiBytes 
+     */
+    static fromTebibytes(numTebiBytes) {
+        return new DigiSpan(numTebiBytes / DigitalSpanUnitsConverter.Tebibytes);
+    }
+
+    /**
+     * @param {number} numKiloBytes 
+     */
+    static fromKiloBytes(numKiloBytes) {
+        return new DigiSpan(numKiloBytes / DigitalSpanUnitsConverter.Kilobytes);
+    }
+
+    /**
+     * @param {number} numMegaBytes 
+     */
+    static fromMegaBytes(numMegaBytes) {
+        return new DigiSpan(numMegaBytes / DigitalSpanUnitsConverter.Megabytes);
+    }
+
+    /**
+     * @param {number} numGigaBytes 
+     */
+    static fromGigaBytes(numGigaBytes) {
+        return new DigiSpan(numGigaBytes / DigitalSpanUnitsConverter.Gigabytes);
+    }
+
+    /**
+     * @param {number} numTeraBytes 
+     */
+    static fromTeraBytes(numTeraBytes) {
+        return new DigiSpan(numTeraBytes / DigitalSpanUnitsConverter.Terabytes);
+    }
+
+    /**
+     * 
+     * @param {Uint8Array|Buffer} buffer 
+     */
+    static fromBuffer(buffer) {
+        return new DigiSpan(buffer.byteLength / DigitalSpanUnitsConverter.Bytes);
     }
 
     /**
@@ -42,6 +90,10 @@ export class DigiSpan extends UnitSpan {
      */
     constructor(quantity) {
         super(DigitalSpanUnitsConverter, quantity);
+    }
+
+    buffer() {
+        return new Uint8Array(Math.ceil(this.to(m => m.Bytes)));
     }
 }
 

@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "unitspan",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "Create differential spans for units of measurement, including time measurements, digital (binary) measurements, and more.",
     "directories": {
         "test": "test"

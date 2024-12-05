@@ -37,9 +37,7 @@ await ts.delay();
 console.log(`This will print definitely after 10 seconds.`);
 ```
 
-# DigiSpan (in progress)
-
-__This UnitSpan is still in development__
+# DigiSpan
 
 Convert between different units of measurement for Digital Storage, such as Bits to Bytes, Kilobytes, or even Kibibytes
 

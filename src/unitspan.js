@@ -1,5 +1,7 @@
 //@ts-check
 
+/** @typedef {Record<string, number|[convertToBaseUnit: (units: number) => number, convertFromBaseUnit: (baseUnits: number) => number]>} Converter */
+
 /**
  * @template {Record<string, number|[convertToBaseUnit: (units: number) => number, convertFromBaseUnit: (baseUnits: number) => number]>} T
  */
