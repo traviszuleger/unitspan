@@ -19,7 +19,7 @@ export class TempSpan extends UnitSpan {
      * @param {number} numFahrenheitDegrees 
      */
     static fromFahrenheit(numFahrenheitDegrees) {
-        return new TempSpan((numFahrenheitDegrees - 32) * 5 / 9 + 273.15);
+        return new TempSpan(TempSpanUnitsConverter.Fahrenheit[0](numFahrenheitDegrees));
     }
 
     /**
@@ -27,7 +27,7 @@ export class TempSpan extends UnitSpan {
      * @param {number} numCelsiusDegrees 
      */
     static fromCelsius(numCelsiusDegrees) {
-        return new TempSpan(numCelsiusDegrees + 273.15);
+        return new TempSpan(TempSpanUnitsConverter.Celsius[0](numCelsiusDegrees));
     }
 
     /**
@@ -42,6 +42,12 @@ export class TempSpan extends UnitSpan {
 
 const TempSpanUnitsConverter = {
     Kelvin: 1,
-    Fahrenheit: n => (n - 273.15) * 9 / 5 + 32,
-    Celsius: n => (n - 273.15)
+    Fahrenheit: /** @type {[(q: number) => number, (q: number) => number]} */ ([
+        degreesF => (degreesF - 32) * 5 / 9 + 273.15, 
+        kelvin => (kelvin - 273.15) * 9 / 5 + 32
+    ]),
+    Celsius: /** @type {[(q: number) => number, (q: number) => number]} */ ([
+        degreesC => (degreesC + 273.15),
+        kelvin => (kelvin - 273.15)
+    ])
 };

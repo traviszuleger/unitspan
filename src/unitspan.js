@@ -1,7 +1,7 @@
 //@ts-check
 
 /**
- * @template {Record<string, number|((n: number) => number)>} T
+ * @template {Record<string, number|[convertToBaseUnit: (units: number) => number, convertFromBaseUnit: (baseUnits: number) => number]>} T
  */
 export class UnitSpan {
     /** 
@@ -44,7 +44,15 @@ export class UnitSpan {
                     throw new Error(`Property "${String(p)}" is not of type string.`);
                 }
                 return (quantity) => {
-                    clone.__baseUnitValue += quantity / clone.#converter[p];
+                    const converter = clone.#converter[p];
+                    if(Array.isArray(converter)) {
+                        const [convertToBaseUnits, convertFromBaseUnits] = converter;
+                        clone.__baseUnitValue = convertToBaseUnits(convertFromBaseUnits(clone.__baseUnitValue) + quantity);
+                    }
+                    else
+                    if(typeof converter === "number") {
+                        clone.__baseUnitValue += quantity / converter;
+                    }
                 }
             }
         });
@@ -64,7 +72,16 @@ export class UnitSpan {
                     throw new Error(`Property "${String(p)}" is not of type string.`);
                 }
                 return (quantity) => {
-                    clone.__baseUnitValue -= quantity / clone.#converter[p];
+                    const converter = clone.#converter[p];
+                    if(Array.isArray(converter)) {
+                        const [convertToBaseUnits, convertFromBaseUnits] = converter;
+                        console.log(p, clone.__baseUnitValue, convertToBaseUnits(quantity));
+                        clone.__baseUnitValue = convertToBaseUnits(convertFromBaseUnits(clone.__baseUnitValue) - quantity);
+                    }
+                    else
+                    if(typeof converter === "number") {
+                        clone.__baseUnitValue -= quantity / converter;
+                    }
                 }
             }
         });
@@ -96,8 +113,9 @@ export class UnitSpan {
                 }
             });
             const converter = this.#converter[callback(t)];
-            if(typeof converter === "function") {
-                val = converter(this.__baseUnitValue);
+            if(Array.isArray(converter)) {
+                const [convertToBaseUnits, convertFromBaseUnits] = converter;
+                val = convertFromBaseUnits(this.__baseUnitValue);
             }
             else
             if(typeof converter === "number") {
@@ -106,8 +124,9 @@ export class UnitSpan {
             return Math.round(val * this.#precision) / this.#precision;
         }
         const converter = this.#converter[callback];
-        if(typeof converter === "function") {
-            val = converter(this.__baseUnitValue);
+        if(Array.isArray(converter)) {
+            const [convertToBaseUnits, convertFromBaseUnits] = converter;
+            val = convertFromBaseUnits(this.__baseUnitValue);
         }
         else
         if(typeof converter === "number") {

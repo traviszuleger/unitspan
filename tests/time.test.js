@@ -132,8 +132,20 @@ suite(`Conversion from Minutes`, () => {
 
 // });
 
+suite(`Algorithmic Expressions`, () => {
+    test(`Expect TimeSpan.fromSeconds(2).add(m => m.milliseconds(500)) to equal [Nanoseconds: 2500000000, Microseconds: 2500000, Milliseconds: 2500, Seconds: 2.5, Minutes: 0.04167]`, () => {
+        const ts = TimeSpan.fromSeconds(2)
+            .add(m => m.Milliseconds(500));
+        expect(ts.to(m => m.Nanoseconds)).toBe(2500000000);
+        expect(ts.to(m => m.Microseconds)).toBe(2500000);
+        expect(ts.to(m => m.Milliseconds)).toBe(2500);
+        expect(ts.to(m => m.Seconds)).toBe(2.5);
+        expect(ts.to(m => m.Minutes)).toBe(0.04167);
+    })
+})
+
 suite(`Cloning`, () => {
-    test(`Expect TimeSpan.fromSeconds(2).sub(m => m.Seconds(1)) to have ability to call .timeout() to delay for only 1 second.`, async () => {
+    test(`Expect TimeSpan.fromSeconds(2) to equal [Seconds: 2] and a separate TimeSpan created from first TimeSpan.sub(m => m.Seconds(1)) to equal [Seconds: 1].`, async () => {
         const ts = TimeSpan.fromSeconds(2);
         const ts_minus1sec = ts.sub(m => m.Seconds(1));
         expect(ts.to(m => m.Seconds)).toBe(2);
