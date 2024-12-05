@@ -1,18 +1,25 @@
 //@ts-check
 
 /**
- * @template {Record<string, number>} T
+ * @template {Record<string, number|((n: number) => number)>} T
  */
 export class UnitSpan {
-    /** @type {T} */
+    /** 
+     * An object with values of numbers or functions. At least one property should map to the value of `1` and that property should
+     * be the base unit of measurement in this class (i.o.w., `__baseUnitValue` should store this unit of measurement.)  
+     * @type {T} 
+     */
     #converter;
     /** @type {number} */
     #precision;
     /** 
+     * Stored value of units, this should always be in one type of unit.  
+     * 
+     * For example, in the `TempSpan` class, this value will always be measured in units of `Kelvin`.
      * @protected 
      * @type {number} 
      */
-    __value;
+    __baseUnitValue;
 
     /**
      * @param {T} converter 
@@ -21,8 +28,8 @@ export class UnitSpan {
      */
     constructor(converter, initialValue, precision=5) {
         this.#converter = converter;
-        this.__value = initialValue;
         this.#precision = 10 ** precision;
+        this.__baseUnitValue = initialValue;
     }
 
     /**
@@ -37,7 +44,7 @@ export class UnitSpan {
                     throw new Error(`Property "${String(p)}" is not of type string.`);
                 }
                 return (quantity) => {
-                    clone.__value += quantity / clone.#converter[p];
+                    clone.__baseUnitValue += quantity / clone.#converter[p];
                 }
             }
         });
@@ -57,7 +64,7 @@ export class UnitSpan {
                     throw new Error(`Property "${String(p)}" is not of type string.`);
                 }
                 return (quantity) => {
-                    clone.__value -= quantity / clone.#converter[p];
+                    clone.__baseUnitValue -= quantity / clone.#converter[p];
                 }
             }
         });
@@ -81,16 +88,31 @@ export class UnitSpan {
      * @returns {number}
      */
     to(callback) {
+        let val = 0;
         if(typeof callback === "function") {
             const t = new Proxy(/** @type {any} */({...this.#converter}), {
                 get: (t,p,r) => {
                     return p;
                 }
             });
-            const val = this.#converter[callback(t)] * this.__value;
+            const converter = this.#converter[callback(t)];
+            if(typeof converter === "function") {
+                val = converter(this.__baseUnitValue);
+            }
+            else
+            if(typeof converter === "number") {
+                val = converter * this.__baseUnitValue;
+            }
             return Math.round(val * this.#precision) / this.#precision;
         }
-        const val = this.#converter[callback] * this.__value;
+        const converter = this.#converter[callback];
+        if(typeof converter === "function") {
+            val = converter(this.__baseUnitValue);
+        }
+        else
+        if(typeof converter === "number") {
+            val = converter * this.__baseUnitValue;
+        }
         return Math.round(val * this.#precision) / this.#precision;
     }
 
@@ -110,7 +132,7 @@ export class UnitSpan {
      */
     #clone() {
         const clone = new /** @type {any} */ (this.constructor)(this.#converter);
-        clone.__value = this.__value;
+        clone.__baseUnitValue = this.__baseUnitValue;
         return clone;
     }
 }

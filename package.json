@@ -1,19 +1,46 @@
 {
     "type": "module",
+    "name": "unitspan",
+    "version": "0.0.6",
+    "description": "Create differential spans for units of measurement, including time measurements, digital (binary) measurements, and more.",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "clean": "del /S /Q .\\dist",
+        "build": "npm run clean && npm run build:source && npm run build:types",
+        "build:source": "tsup",
+        "build:types": "tsc",
+        "prepare": "npm run build"
+    },
+    "keywords": [
+        "units",
+        "span",
+        "conversion",
+        "time",
+        "binary",
+        "digital"
+    ],
+    "author": "Travis R. Zuleger",
+    "repository": {
+        "url": "https://github.com/tzuleger/unitspan"
+    },
+    "license": "MIT",
+    "module": "./dist/index.js",
+    "types": "./dist/types/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/types/index.d.ts"
+        }
+    },
     "devDependencies": {
         "@types/node": "^22.10.1",
         "tsup": "^8.3.5",
         "typescript": "^5.7.2",
-        "vitest": "^2.1.8"
-    },
-    "name": "unitspan",
-    "version": "0.0.3",
-    "description": "Create differential spans for units of measurement, including time measurements, digital (binary) measurements, and more.",
-    "main": "src/index.js",
-    "directories": {
-        "test": "test"
-    },
-    "dependencies": {
+        "vitest": "^2.1.8",
         "assertion-error": "^2.0.1",
         "cac": "^6.7.14",
         "chai": "^5.1.2",
@@ -45,35 +72,5 @@
         "vite": "^5.4.11",
         "vite-node": "^2.1.8",
         "why-is-node-running": "^2.3.0"
-    },
-    "scripts": {
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "clean": "del /S /Q .\\dist",
-        "build": "npm run clean && npm run build:source && npm run build:types",
-        "build:source": "tsup",
-        "build:types": "tsc",
-        "prepare": "npm run build"
-    },
-    "keywords": [
-        "units",
-        "span",
-        "conversion",
-        "time",
-        "binary",
-        "digital"
-    ],
-    "author": "Travis R. Zuleger",
-    "repository": {
-        "url": "https://github.com/tzuleger/unitspan"
-    },
-    "license": "MIT",
-    "module": "./dist/index.js",
-    "types": "./dist/types/index.d.ts",
-    "exports": {
-        ".": {
-            "import": "./dist/index.js",
-            "types": "./dist/types/index.d.ts"
-        }
     }
 }

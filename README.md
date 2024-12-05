@@ -1,6 +1,10 @@
-Create differential spans for different units of measurement.
+# UnitSpan
+
+UnitSpan is a suite of conversion tools for easy conversions between different units of measurement.  
 
 # TimeSpan
+
+Convert between different units of measurement for time, such as nanoseconds to seconds, milliseconds, days, weeks, years, and more!
 
 ```js
 import { TimeSpan } from "unitspan";
@@ -35,6 +39,10 @@ console.log(`This will print definitely after 10 seconds.`);
 
 # DigiSpan (in progress)
 
+__This UnitSpan is still in development__
+
+Convert between different units of measurement for Digital Storage, such as Bits to Bytes, Kilobytes, or even Kibibytes
+
 ```js
 import { DigiSpan } from "unitspan";
 
@@ -42,7 +50,24 @@ const ds = DigiSpan.fromBits(12);
 console.log(ds.to(m => m.Bytes)); // prints 1.5
 
 // to be implemented!
-const buffer = ds.buffer(); // creates a Uint8Array of size 2 (Math.ceil(ds.to(m => m.Bytes))) 
+const buffer = ds.buffer(); // creates a Uint8Array of size 2 (Math.ceil(ds.to(m => m.Bytes)))
+
+// to be implemented! Get the number of digital units that your buffer size is.
+const dsFromBuffer = DigiSpan.fromBuffer(new Uint8Array(12));
+console.log(ds.to(m => m.Bytes)); // 12
+console.log(ds.to(m => m.Bits)); // 96
+```
+
+# TempSpan
+
+Convert between the different temperature units of measurement, Kelvin, Celsius, and Fahrenheit.
+
+```js
+import { TempSpan } from "unitspan";
+
+const ts = TempSpan.fromKelvin(0);
+console.log(ds.to(m => m.Fahrenheit)); // will print -459.67
+console.log(ds.to(m => m.Celsius)); // will print -273.15
 ```
 
 # alternative syntax

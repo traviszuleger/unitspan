@@ -1,8 +1,10 @@
 //@ts-check
-import { TimeSpan } from "./time.js";
 import { DigiSpan } from "./digi.js";
+import { TempSpan } from "./temp.js";
+import { TimeSpan } from "./time.js";
 
 export {
     DigiSpan,
+    TempSpan,
     TimeSpan,
 };
