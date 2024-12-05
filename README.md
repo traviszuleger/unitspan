@@ -47,10 +47,9 @@ import { DigiSpan } from "unitspan";
 const ds = DigiSpan.fromBits(12);
 console.log(ds.to(m => m.Bytes)); // prints 1.5
 
-// to be implemented!
 const buffer = ds.buffer(); // creates a Uint8Array of size 2 (Math.ceil(ds.to(m => m.Bytes)))
 
-// to be implemented! Get the number of digital units that your buffer size is.
+// Get the number of digital units that your buffer size is.
 const dsFromBuffer = DigiSpan.fromBuffer(new Uint8Array(12));
 console.log(ds.to(m => m.Bytes)); // 12
 console.log(ds.to(m => m.Bits)); // 96
@@ -77,6 +76,61 @@ const ts = TimeSpan.fromSeconds(10);
 ts.to(m => m.Minutes);
 // or
 ts.to("Minutes");
+```
+
+# Wrappers
+
+The UnitSpan class syntax can be different from what other languages are used to. For example, C#'s implementation of TimeSpan would look something like this when converting seconds to minutes:
+
+```cs
+TimeSpan.FromSeconds(10).Minutes;
+```
+
+The above syntax is much more understandable than:
+
+```js
+TimeSpan.fromSeconds(10).to(m => m.Minutes);
+```
+
+Therefore, this section is dedicated to creating a Wrapper class from the UnitSpan library to make the library look more human-friendly.  
+
+Here is an example of creating a wrapper class that looks like C#'s implementation:
+```js
+import { TimeSpan as US_TimeSpan } from 'unitspan';
+
+export class TimeSpan {
+    /** @type {US_TimeSpan} */
+    #timespan;
+
+    /**
+     * @param {number} initialQuantity
+     */
+    static FromSeconds(initialQuantity) {
+        return new TimeSpan(US_TimeSpan.fromSeconds(initialQuantity));
+    }
+
+    /**
+     * @protected
+     * @param {US_TimeSpan} timespan
+     */
+    constructor(timespan) {
+        this.#timespan = timespan;
+    }
+
+    get Minutes() {
+        return this.#timespan.to(m => m.Minutes);
+    }
+
+    get Timeout() {
+        return this.#timespan.timeout();
+    }
+
+    Interval(callback) {
+        return this.#timespan.interval(callback);
+    }
+}
+
+const _12secondsToMinutes = TimeSpan.FromSeconds(12).Minutes;
 ```
 
 # Helpful information

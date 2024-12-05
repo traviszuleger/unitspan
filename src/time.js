@@ -140,8 +140,8 @@ export class TimeSpan extends UnitSpan {
     }
 
     /**
-     * @param {number} quantity
      * @protected
+     * @param {number} quantity
      */
     constructor(quantity) {
         super(TimeSpanUnitsConverter, quantity);
