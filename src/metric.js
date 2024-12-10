@@ -6,6 +6,7 @@ import { UnitSpan } from "./unitspan.js";
  */
 export class MetricSpan extends UnitSpan {
 
+    
 }
 
 const MetricSpanUnitsConverter = {

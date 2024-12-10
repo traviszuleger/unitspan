@@ -39,6 +39,18 @@ export class TimeSpan extends UnitSpan {
         const time = Date.now() - date.getTime();
         return new TimeSpan(time / TimeSpanUnitsConverter.Milliseconds);
     }
+
+    /**
+     * Create a differential time span between now and a date in the future.
+     * @param {Date} date 
+     * Date to differentiate between now. (This can be in the past, it will just have negative units)
+     * @returns {TimeSpan}
+     * New {@link TimeSpan} class object that can convert between other units of measurement per {@link TimeSpanUnitsConverter} 
+     */
+    static until(date) {
+        const time = date.getTime() - Date.now();
+        return new TimeSpan(time / TimeSpanUnitsConverter.Milliseconds);
+    }
     
     /**
      * Create a TimeSpan class with the initial number of nanoseconds.
