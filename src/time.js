@@ -169,14 +169,24 @@ export class TimeSpan extends UnitSpan {
      * ```
      * @param {() => void|Promise<void>} callback 
      * Function
-     * @returns {() => void} Function to unsubscribe from the timeout.
+     * @returns {TimeoutController}
+     * Object with `clear` and `refresh` functions to control the timeout.
      * 
      */
     timeout(callback) {
-        const timeout = setTimeout(callback, Math.floor(this.to(m => m.Milliseconds)));
-        return () => {
-            clearTimeout(timeout);
+        let timeout = setTimeout(callback, Math.floor(this.to(m => m.Milliseconds)));
+        const timeoutController = {
+            cancel: () => { 
+                clearTimeout(timeout);
+
+            },
+            refresh: () => { 
+                clearTimeout(timeout); 
+                timeout = setTimeout(callback, Math.floor(this.to(m => m.Milliseconds)));
+                return timeoutController;
+            }
         };
+        return timeoutController;
     }
 
     /**
@@ -227,3 +237,9 @@ const TimeSpanUnitsConverter = {
     Months: 1/30.437/24/60/60/1000/1000/1000,
     Years: 1/365.2425/24/60/60/1000/1000/1000
 };
+
+/**
+ * @typedef TimeoutController
+ * @prop {() => void} cancel
+ * @prop {() => TimeoutController} refresh
+ */
