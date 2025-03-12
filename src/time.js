@@ -210,15 +210,25 @@ export class TimeSpan extends UnitSpan {
      * @returns {IntervalController} Function to unsubscribe from the interval.
      */
     interval(callback) {
+        /** @type {NodeJS.Timeout|undefined} */
         let interval = setInterval(callback, Math.floor(this.to(m => m.Milliseconds)));
         const intervalController = {
             cancel: () => { 
                 clearInterval(interval);
+                interval = undefined;
             },
             start: () => { 
-                clearInterval(interval); 
+                if(interval) {
+                    clearInterval(interval); 
+                }
                 interval = setInterval(callback, Math.floor(this.to(m => m.Milliseconds)));
                 return intervalController;
+            },
+            get isStarted() {
+                return interval !== undefined;
+            },
+            get isStopped() {
+                return interval === undefined;
             }
         };
         return intervalController;
@@ -255,5 +265,11 @@ const TimeSpanUnitsConverter = {
 /**
  * @typedef IntervalController
  * @prop {() => void} cancel
+ * Stops the interval.
  * @prop {() => IntervalController} start
+ * Starts the interval again. If the interval is already ongoing, then the interval is restarted.
+ * @prop {boolean} isStarted
+ * Returns true if the interval is ongoing.
+ * @prop {boolean} isStopped
+ * Returns true if the interval is stopped.
  */
