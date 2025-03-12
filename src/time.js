@@ -207,13 +207,21 @@ export class TimeSpan extends UnitSpan {
      * // Printing 3/3
      * ```
      * @param {() => void|Promise<void>} callback 
-     * @returns {() => void} Function to unsubscribe from the interval.
+     * @returns {IntervalController} Function to unsubscribe from the interval.
      */
     interval(callback) {
-        const interval = setInterval(callback, Math.floor(this.to(m => m.Milliseconds)));
-        return () => {
-            clearInterval(interval);
+        let interval = setInterval(callback, Math.floor(this.to(m => m.Milliseconds)));
+        const intervalController = {
+            cancel: () => { 
+                clearInterval(interval);
+            },
+            start: () => { 
+                clearInterval(interval); 
+                interval = setInterval(callback, Math.floor(this.to(m => m.Milliseconds)));
+                return intervalController;
+            }
         };
+        return intervalController;
     }
 
     /**
@@ -242,4 +250,10 @@ const TimeSpanUnitsConverter = {
  * @typedef TimeoutController
  * @prop {() => void} cancel
  * @prop {() => TimeoutController} refresh
+ */
+
+/**
+ * @typedef IntervalController
+ * @prop {() => void} cancel
+ * @prop {() => IntervalController} start
  */
