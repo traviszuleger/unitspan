@@ -1,9 +1,9 @@
 //@ts-check
 
-/** @typedef {Record<string, number|[convertToBaseUnit: (units: number) => number, convertFromBaseUnit: (baseUnits: number) => number]>} Converter */
+/** @typedef {Record<string, number|[convertToBaseUnit: (units: number) => number, convertFromBaseUnit: (baseUnits: number) => { decimal: number, remainder: number, fraction: number }]>} Converter */
 
 /**
- * @template {Record<string, number|[convertToBaseUnit: (units: number) => number, convertFromBaseUnit: (baseUnits: number) => number]>} T
+ * @template {Record<string, number|[convertToBaseUnit: (units: number) => number, convertFromBaseUnit: (baseUnits: number) => { decimal: number, remainder: number, fraction: number }]>} T
  */
 export class UnitSpan {
     /** 
@@ -12,6 +12,12 @@ export class UnitSpan {
      * @type {T} 
      */
     #converter;
+    /**
+     * An object with the same keys as the `converter` object, but with values being objects holding
+     * configurations for how the formatted strings should be handled.
+     * @type {{[K in keyof T]: { padStart: number }}}
+     */
+    #formatter;
     /** @type {number} */
     #precision;
     /** 
@@ -24,14 +30,17 @@ export class UnitSpan {
     __baseUnitValue;
 
     /**
+     * @protected
+     * @param {number} quantity
      * @param {T} converter 
-     * @param {number} initialValue
+     * @param {{[K in keyof T]: { padStart: number }}} formatter
      * @param {number} precision
      */
-    constructor(converter, initialValue, precision=5) {
+    constructor(quantity, converter, formatter, precision=5) {
         this.#converter = converter;
+        this.#formatter = formatter;
         this.#precision = 10 ** precision;
-        this.__baseUnitValue = initialValue;
+        this.__baseUnitValue = quantity;
     }
 
     /**
@@ -92,50 +101,142 @@ export class UnitSpan {
     }
 
     /**
-     * Get the conversion of units as specified from the property reference (and return value) from the `model` parameter used in `callback`.
-     * @overload
+     * @overload Overload 1
      * @param {(model: PropertyRetriever<T>) => keyof T} callback
      * Callback used to get the type of conversion (or otherwise, the key of conversion) to use when converting.
      * @returns {number}
      * The converted number from the unit quantity held by this UnitSpan class object.
+     * 
+     * @overload
+     * @param {(model: PropertyRetriever<T>) => string} callback
+     * Callback used to get the type of conversion (or otherwise, the key of conversion) to use when converting.
+     * @returns {string}
+     * The converted number from the unit quantity held by this UnitSpan class object.
+     * 
      * @overload
      * @param {keyof T} key
      * Some string property of the conversion object to use when converting. 
      * @returns {number}
+     * 
+     * @overload
+     * @param {string} key
+     * @returns {string}
      * The converted number from the unit quantity held by this UnitSpan class object.
-     * @param {((model: PropertyRetriever<T>) => keyof T)|keyof T} callback
-     * @returns {number}
+     * 
+     * Get the conversion of units as specified from the property reference (and return value) from the `model` parameter used in `callback`.
+     * @param {((model: PropertyRetriever<T>) => keyof T|string)|keyof T|string} callback
+     * @returns {string|number}
      */
     to(callback) {
         let val = 0;
         if(typeof callback === "function") {
             const t = new Proxy(/** @type {any} */({...this.#converter}), {
                 get: (t,p,r) => {
-                    return p;
+                    return `{{${String(p)}}}`;
                 }
             });
-            const converter = this.#converter[callback(t)];
-            if(Array.isArray(converter)) {
-                const [convertToBaseUnits, convertFromBaseUnits] = converter;
-                val = convertFromBaseUnits(this.__baseUnitValue);
+            let keyOrString = callback(t);
+            if(typeof keyOrString !== "string") {
+                throw new Error(`Expected a string, but got "${typeof keyOrString}".`);
             }
-            else
-            if(typeof converter === "number") {
+            
+            const replacedKeyOrString = keyOrString.replace(/\{\{([^\{\}]*)\}\}/, "$1");
+            if(replacedKeyOrString in this.#converter) {
+                return handleOverload1_3.bind(this)(replacedKeyOrString);
+            }
+            else {
+                return handleOverload2_4.bind(this)(keyOrString);
+            }
+        }
+        else {
+            if(typeof callback !== "string") {
+                callback = String(callback);
+            }
+            if(callback in this.#converter) {
+                return handleOverload1_3.bind(this)(callback);
+            }
+            else {
+                return handleOverload2_4.bind(this)(callback);
+            }
+        }
+        /**
+         * 
+         * @this {UnitSpan<T>}
+         * @param {keyof T} key
+         * @returns {number} 
+         */
+        function handleOverload1_3(key) {
+            const converter = this.#converter[key];
+            if(Array.isArray(converter)) {
+                const [,convertFromBaseUnits] = converter;
+                const { decimal, fraction } = convertFromBaseUnits(this.__baseUnitValue);
+                val = decimal + (Math.floor(fraction * this.#precision) / this.#precision);
+            }
+            else if(typeof converter === "number") {
                 val = converter * this.__baseUnitValue;
             }
             return Math.round(val * this.#precision) / this.#precision;
         }
-        const converter = this.#converter[callback];
-        if(Array.isArray(converter)) {
-            const [convertToBaseUnits, convertFromBaseUnits] = converter;
-            val = convertFromBaseUnits(this.__baseUnitValue);
+
+        /**
+         * @this {UnitSpan<T>}
+         * @param {string} formatString
+         * @returns {string} 
+         */
+        function handleOverload2_4(formatString) {
+            const entries = Object.entries(this.#converter)
+                .sort(([k1,v1],[k2,v2]) => {
+                    if(typeof v1 === "number" && typeof v2 === "number") {
+                        return v1 - v2;
+                    }
+                    if(typeof v1 !== "number") {
+                        const [,convertFromBaseUnits] = v1;
+                        const { decimal, fraction, remainder } = convertFromBaseUnits(this.__baseUnitValue);
+                        v1 = decimal + (Math.floor(fraction * this.#precision) / this.#precision);
+                    }
+                    if(typeof v2 !== "number") {
+                        const [,convertFromBaseUnits] = v2;
+                        const { decimal, fraction, remainder } = convertFromBaseUnits(this.__baseUnitValue);
+                        v2 = decimal + (Math.floor(fraction * this.#precision) / this.#precision);
+                    }
+                    return v2 - v1;
+                });
+            
+            let currentBaseUnitValue = this.__baseUnitValue;
+            for(const [key, converter] of entries) {
+                if(!formatString.includes(key)) {
+                    continue;
+                }
+                if(Array.isArray(converter)) {
+                    const [,convertFromBaseUnits] = converter;
+                    const { decimal, remainder } = convertFromBaseUnits(currentBaseUnitValue);
+                    formatString = formatString.replaceAll(`{{${key}}}`, Math.floor(decimal).toString().padStart(this.#formatter[key].padStart, "0"));
+                    currentBaseUnitValue = remainder;
+                }
+                else if(typeof converter === "number") {
+                    let val = converter * currentBaseUnitValue;
+                    if(Number.isInteger(val)) {
+                        currentBaseUnitValue = 0;
+                    }
+                    else {
+                        if(Math.floor(val) === 0) {
+                            val = 0;
+                        }
+                        else {
+                            const frac = val - Math.floor(val);
+                            const remainder = (Math.floor(frac * this.#precision) / this.#precision);
+                            currentBaseUnitValue = (remainder / val) * currentBaseUnitValue;
+                            val = Math.floor(val);
+                        }
+                    }
+                    formatString = formatString.replaceAll(`{{${key}}}`, val.toString().padStart(this.#formatter[key].padStart, "0"));
+                }
+            }
+            return formatString;
         }
-        else
-        if(typeof converter === "number") {
-            val = converter * this.__baseUnitValue;
-        }
-        return Math.round(val * this.#precision) / this.#precision;
     }
+
+
 
     /**
      * Set the precision of the resulting conversions.

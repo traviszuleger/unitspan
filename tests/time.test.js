@@ -2,6 +2,29 @@
 import { test, expect, suite, vi } from 'vitest';
 import { TimeSpan } from '../src/index.js';
 
+suite(`Format strings`, () => {
+    test(`Expect TimeSpan.fromSeconds(2.5).to("{{Hours}}:{{Minutes}}:{{Seconds}}.{{Milliseconds}}") to equal "00:00:02.500"`, () => {
+        const ts = TimeSpan.fromSeconds(2.5);
+        expect(ts.to("{{Hours}}:{{Minutes}}:{{Seconds}}.{{Milliseconds}}")).toBe("00:00:02.500");
+        expect(ts.toString()).toBe("00:00:02.500");
+    });
+
+    test("Expect TimeSpan.fromSeconds(2.5).to(m => `${m.Hours}:${m.Minutes}:${m.Seconds}.${m.Milliseconds}`) to equal '00:00:02.500'", () => {
+        const ts = TimeSpan.fromSeconds(2.5);
+        expect(ts.to(m => `${m.Hours}:${m.Minutes}:${m.Seconds}.${m.Milliseconds}`)).toBe("00:00:02.500");
+    });
+
+    test(`Expect TimeSpan.fromHours(2.5).to("{{Hours}}:{{Minutes}}:{{Seconds}}.{{Milliseconds}}") to equal "02:30:00.000"`, () => {
+        const ts = TimeSpan.fromHours(2.5);
+        expect(ts.to("{{Hours}}:{{Minutes}}:{{Seconds}}.{{Milliseconds}}")).toBe("02:30:00.000");
+    });
+
+    test("Expect TimeSpan.fromHours(2.5).to(m => `${m.Hours}:${m.Minutes}:${m.Seconds}.${m.Milliseconds}`) to equal '02:30:00.000'", () => {
+        const ts = TimeSpan.fromHours(2.5);
+        expect(ts.to(m => `${m.Hours}:${m.Minutes}:${m.Seconds}.${m.Milliseconds}`)).toBe("02:30:00.000");
+    });
+})
+
 suite(`Conversion from Nanoseconds`, () => {
     const ts = TimeSpan.fromNanoseconds(100);
     test(`Expect TimeSpan.fromNanoseconds(100) to equal 100 when converted to nanoseconds.`, () => {

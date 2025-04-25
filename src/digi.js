@@ -2,7 +2,7 @@
 import { UnitSpan } from "./unitspan.js";
 
 /**
- * @extends {UnitSpan<DigitalSpanUnitsConverter>}
+ * @extends {UnitSpan<typeof DigitalSpanUnitsConverter>}
  */
 export class DigiSpan extends UnitSpan {
 
@@ -89,7 +89,11 @@ export class DigiSpan extends UnitSpan {
      * @protected
      */
     constructor(quantity) {
-        super(DigitalSpanUnitsConverter, quantity);
+        super(
+            quantity,
+            DigitalSpanUnitsConverter, 
+            DigitalSpanUnitsFormatter 
+        );
     }
 
     buffer() {
@@ -97,6 +101,7 @@ export class DigiSpan extends UnitSpan {
     }
 }
 
+/** @enum {typeof DigitalSpanUnitsConverter[keyof typeof DigitalSpanUnitsConverter]} */
 const DigitalSpanUnitsConverter = Object.freeze({
     Bits: 1,
     Bytes: 1/8,
@@ -108,4 +113,37 @@ const DigitalSpanUnitsConverter = Object.freeze({
     Megabytes: 1/1000/1000/8,
     Gigabytes: 1/1000/1000/1000/8,
     Terabytes: 1/1000/1000/1000/1000/8
+});
+
+const DigitalSpanUnitsFormatter = Object.freeze({
+    Bits: {
+        padStart: 1,
+    },
+    Bytes: {
+        padStart: 1,
+    },
+    Kibibytes: {
+        padStart: 1,
+    },
+    Mebibytes: {
+        padStart: 1,
+    },
+    Gibibytes: {
+        padStart: 1,
+    },
+    Tebibytes: {
+        padStart: 1,
+    },
+    Kilobytes: {
+        padStart: 1,
+    },
+    Megabytes: {
+        padStart: 1,
+    },
+    Gigabytes: {
+        padStart: 1,
+    },
+    Terabytes: {
+        padStart: 1,
+    },
 });
